@@ -1,0 +1,52 @@
+parameters:
+
+  resourceGroupName: ''
+  subscriptionId: ''
+  location: ''
+  archiveStorageAccountId: ''
+  workspaceId: ''
+  namePrefix: ''
+  ipCidrEnvVnet: ''
+  dnsResourceGroupName: ''
+  RunBackupScript: 
+
+stages:
+
+- stage: mainStage1
+  displayName: Main Stage 1
+
+  jobs:
+
+    - job: mainStage1Job1
+
+      steps:
+                    
+      - task: AzureResourceManagerTemplateDeployment@3
+        displayName: Deploy Main
+        inputs:
+          deploymentScope: subscription
+          azureResourceManagerConnection: sub-jcs-student1
+          subscriptionId: ${{ parameters.subscriptionId }}
+          action: Create Or Update Resource Group
+          resourceGroupName: ${{ parameters.resourceGroupName }}
+          location: ${{ parameters.location }}
+          csmFile: bicep/main.bicep
+          overrideParameters: >
+            -namePrefix ${{ parameters.namePrefix }}
+            -location ${{ parameters.location }}
+            -archiveStorageAccountId ${{ parameters.archiveStorageAccountId }}
+            -workspaceId ${{ parameters.workspaceId }} 
+            -dnsResourceGroupName ${{ parameters.dnsResourceGroupName }}   
+            -ipCidrEnvVnet ${{ parameters.ipCidrEnvVnet }}             
+          deploymentName: jcs-main-$(Build.BuildNumber)
+
+      - ${{ if eq(parameters.RunBackupScript, true) }}:
+        - task: AzurePowerShell@5
+          displayName: Backup Script
+          inputs:
+            azureSubscription: sub-jcs-student1
+            ScriptPath: scripts/backupScript.ps1
+            ScriptArguments: >
+              -resourceGroupName ${{ parameters.resourceGroupName }}
+              -namePrefix ${{ parameters.namePrefix }}
+            azurePowershellVersion: LatestVersion

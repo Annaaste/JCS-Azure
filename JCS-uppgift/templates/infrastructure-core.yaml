@@ -1,0 +1,41 @@
+parameters:
+
+  subscriptionId: ''
+  location: ''
+  namePrefix: ''
+  vmAdminPassword: ''
+  roleAssignmentUserPrincipalId: ''
+  ipVnet: {}
+  variableGroupName: keyvault_vm_password
+
+
+
+stages:
+
+- stage: DeployResourcesStage
+  displayName: Deploy Resources Stage
+  variables:
+  - group: ${{ parameters.variableGroupName }}
+
+
+  jobs:
+
+  - job: deployResourcesStageJob1
+   
+    steps:
+
+    - task: AzureResourceManagerTemplateDeployment@3
+      displayName: Deploy main-core
+      inputs:
+        deploymentScope: Subscription
+        azureResourceManagerConnection: sub-jcs-student1
+        subscriptionId: ${{ parameters.subscriptionId }}
+        location: ${{ parameters.location }}
+        csmFile: services/core/bicep/main.bicep
+        overrideParameters: >
+          -location ${{ parameters.location }}
+          -namePrefix ${{ parameters.namePrefix }}
+          -roleAssignmentUserPrincipalId ${{ parameters.roleAssignmentUserPrincipalId }}
+          -vmAdminPassword $(vmAdminPassword)
+          -ipVnet ${{ convertToJson(parameters.ipVnet) }}          
+        deploymentName: jcs-main-$(Build.BuildNumber)

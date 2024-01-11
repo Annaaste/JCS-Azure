@@ -1,0 +1,34 @@
+trigger: none
+
+pool:
+  vmImage: ubuntu-latest
+
+
+parameters:
+
+- name: ipVnet
+  type: object
+  default:
+    core: 10.255.0.0/24
+    mgmt: 10.150.0.0/24
+
+variables:
+
+  subscriptionId: 3f03d422-196d-4c8c-aff9-8057f6d7f838
+  location: swedencentral
+  namePrefix: jcs-core
+  roleAssignmentUserPrincipalId: 618a9d4f-8d7e-42dd-8c4f-1d085df67987
+  
+
+
+stages:
+
+- template: ../templates/infrastructure-core.yaml
+  parameters:
+    subscriptionId: $(subscriptionId)
+    location: $(location)
+    namePrefix: $(namePrefix)
+    roleAssignmentUserPrincipalId: $(roleAssignmentUserPrincipalId)
+    ipVnet: ${{ parameters.ipVnet }}    
+    vmAdminPassword: $(JCS-VmPassword)
+

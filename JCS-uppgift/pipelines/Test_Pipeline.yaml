@@ -1,0 +1,39 @@
+trigger: none
+
+pool:
+  vmImage: windows-latest
+
+
+parameters:
+
+- name: RunBackupScript
+  displayName: Runs backup script
+  type: boolean
+  default: false
+
+variables:
+
+  subscriptionId: 3f03d422-196d-4c8c-aff9-8057f6d7f838
+  resourceGroupName: jcs-env2-rg
+  namePrefix: jcs-env2
+  location: swedencentral
+  ipCidrEnvVnet: 10.132.0.0/24  
+  archiveStorageAccountId: /subscriptions/3f03d422-196d-4c8c-aff9-8057f6d7f838/resourceGroups/jcs-core-rg/providers/Microsoft.Storage/storageAccounts/jcscorest
+  workspaceId: /subscriptions/3f03d422-196d-4c8c-aff9-8057f6d7f838/resourceGroups/jcs-core-rg/providers/Microsoft.OperationalInsights/workspaces/jcs-core-log
+  dnsResourceGroupName: jcs-core-dns-rg
+
+
+stages:
+
+
+- template: ../templates/infrastructure_level_1.yaml
+  parameters:
+    subscriptionId: $(subscriptionId)
+    resourceGroupName: $(resourceGroupName)
+    namePrefix: $(namePrefix)
+    location: $(location)
+    ipCidrEnvVnet: $(ipCidrEnvVnet)    
+    archiveStorageAccountId: $(archiveStorageAccountId)
+    workspaceId: $(workspaceId)
+    dnsResourceGroupName: $(dnsResourceGroupName)
+    RunBackupScript: ${{ parameters.RunBackupScript }}
